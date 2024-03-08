@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -10,33 +9,42 @@ import (
 var DB *sql.DB
 
 func InitDB() {
-	DB, err := sql.Open("sqlite3", "api.db")
+	var err error
+	DB, err = sql.Open("sqlite3", "api.db")
 
 	if err != nil {
-		log.Fatal("Cannot connect to db: ", err)
 		panic("Could not open database")
 	}
 
 	DB.SetMaxOpenConns(10)
 	DB.SetMaxIdleConns(5)
 
+	// deleteEventsTable()
 	createTables()
 }
 
 func createTables() {
-
 	createEventTable := `
-	CREATE TABLE IF NOT EXISTS events(
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL,
-		location TEXT NOT NULL,
-		dateTime DATETIME NOT NULL,
-		user_id INTEGER
-	)
-	`
+    CREATE TABLE IF NOT EXISTS events(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL,
+        location TEXT NOT NULL,
+        date_time DATETIME NOT NULL,
+        user_id INTEGER
+    )
+    `
 	_, err := DB.Exec(createEventTable)
 
 	if err != nil {
-		panic("Could create event table")
+		panic("Could not create event table")
+	}
+}
+
+// Function to delete the events table
+func deleteEventsTable() {
+	_, err := DB.Exec("DROP TABLE IF EXISTS events")
+	if err != nil {
+		panic("Could not delete events table")
 	}
 }
